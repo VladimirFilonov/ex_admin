@@ -234,8 +234,28 @@ defmodule ExAdmin.Theme.AdminLte2.Form do
                 end
                 div ".col-sm-10#{error}" do
                   val = if res, do: [value: Map.get(res, f_name, "") |> escape_value], else: []
-                  Xain.input([type: :text, maxlength: "255", id: "#{ext_name}_#{f_name}",
-                    class: "form-control", name: name] ++ val)
+                  case Map.get(field[:opts], :field_type) do
+                    :file ->
+                      div "" do
+                        span "" do
+                          case val[:value] do
+                            nil -> ""
+                            %{:file_name => file_name} ->
+                              img src: ExAdmin.get_registered(res.__struct__).resource_model.image_url(res), height: 200
+                            _ -> ""
+                          end
+                        end
+                        Xain.input([type: :file, maxlength: "255", id: "#{ext_name}_#{f_name}",
+                           class: "form-control", name: name])
+                      end
+                    :checkbox ->
+                      checked = if val, do: [{:checked, true}], else: []
+                      Xain.input([type: :checkbox, id: "#{ext_name}_#{f_name}",
+                         name: name] ++ checked)
+                    _ ->
+                      Xain.input([type: :text, maxlength: "255", id: "#{ext_name}_#{f_name}",
+                        class: "form-control", name: name] ++ val)
+                  end
                   build_errors(errors, field[:opts][:hint])
                 end
               end
